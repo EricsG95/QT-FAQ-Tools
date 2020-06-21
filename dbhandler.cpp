@@ -1,7 +1,6 @@
 #include "dbhandler.h"
 
-DbHandler::DbHandler()
-{
+DbHandler::DbHandler(){
     database_.removeDatabase("qt_sql_default_connection");
     database_ = QSqlDatabase::addDatabase("QPSQL");
 
@@ -13,8 +12,7 @@ DbHandler::DbHandler()
                10318);
 }
 
-DbHandler::DbHandler(std::vector<QString>& dbparams ,int port)
-{
+DbHandler::DbHandler(std::vector<QString>& dbparams ,int port){
     username_ = dbparams[0];
     password_ = dbparams[1];
     hostname_ = dbparams[2];
@@ -24,17 +22,16 @@ DbHandler::DbHandler(std::vector<QString>& dbparams ,int port)
     database_.removeDatabase("qt_sql_default_connection");
     database_ = QSqlDatabase::addDatabase("QPSQL");
 
-    table_names = std::vector<QString>();
-    table_names.push_back("projects");
-    table_names.push_back("questions");
+//    table_names = std::vector<QString>();
+//    table_names.push_back("projects");
+//    table_names.push_back("questions");
 }
 
 void DbHandler::setParams(QString username,
                           QString  password,
                           QString  hostname,
                           QString  dbname,
-                          int port)
-{
+                          int port){
     username_ = username;
     hostname_ = hostname;
     password_ = password;
@@ -42,21 +39,18 @@ void DbHandler::setParams(QString username,
     port_ = port;
 }
 
-void DbHandler::close()
-{
+void DbHandler::close(){
     if(database_.isOpen())
     {
         database_.close();
     }
 }
 
-QString DbHandler::lastError()
-{
+QString DbHandler::lastError(){
     return database_.lastError().text();
 }
 
-QString DbHandler::dbConnect()
-{
+QString DbHandler::dbConnect(){
     if(database_.isOpen())
     {
         database_.close();

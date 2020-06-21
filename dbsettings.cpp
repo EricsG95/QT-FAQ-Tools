@@ -72,3 +72,4 @@ void DbSettings::on_btn_set_app_clicked()
         reject();
     }
 }
+

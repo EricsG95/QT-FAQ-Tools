@@ -10,8 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadDatabase();
 }
 
-void MainWindow::loadDatabase()
-{
+void MainWindow::loadDatabase(){
     if(db_instance_ != nullptr)
     {
         db_instance_->close();
@@ -21,9 +20,19 @@ void MainWindow::loadDatabase()
     initialiseDB();
 
     ui->statusbar->showMessage(db_instance_->dbConnect());
+
+    faq_data_ = std::make_unique<DataObject>();
+
+    if(!prepareViewData()) return;
+
+    initialiseTreeView();
+
+    excuteQueryOnDb("SELECT * FROM questions");
+
+    loadDataToFaqTreeView();
 }
 
-void MainWindow::initialiseDB(){
+void MainWindow::initialiseDB() {
     int port_setting;
     std::vector<QString> db_settings(4,0);
 
@@ -33,10 +42,8 @@ void MainWindow::initialiseDB(){
                 db_settings, port_setting);
 }
 
-// Loading settings
 void MainWindow::loadSettings(std::vector<QString>& dbparams,
-                              int& port)
-{
+                              int& port){
     std::ifstream ifs;
     ifs.open("settings.ini");
     std::string name,pass,host,db;
@@ -57,8 +64,111 @@ void MainWindow::loadSettings(std::vector<QString>& dbparams,
     }
 }
 
-void MainWindow::on_actionSettings_triggered()
+bool MainWindow::prepareViewData()
 {
+    bool is_successful = true;
+    QString all_errors = "";
+
+    faq_data_->column_names_<< "ID" << "Question" << "Answer" << "Project";
+
+    // load set with enumerator columns
+    faq_data_->enum_cols.insert(4);
+    faq_data_->enum_cols.insert(7);
+
+    ui->lv_projects->clear();
+
+    // Acessing data layer
+    QSqlQuery query;
+    if(query.exec("SELECT * FROM projects")){
+        while(query.next()){
+            faq_data_->projects_.insert(
+            {query.value(0).toInt(),
+             query.value(1).toString()});
+
+            faq_data_->rev_projects_.insert(
+            {query.value(1).toString().toStdString(),
+             query.value(0).toInt()});
+
+            QListWidgetItem * itm = new QListWidgetItem(query.value(1).toString());
+
+            itm->setCheckState(Qt::Checked);
+            itm->setData(0x0100,query.value(0));
+            ui->lv_projects->addItem(itm);
+        }
+    } else{
+        is_successful = false;
+        all_errors += "Error loading state names.\n";
+    }
+
+    if(!is_successful)
+    {
+        QMessageBox msg;
+        msg.setText(all_errors + db_instance_->lastError() + query.lastError().text());
+        msg.exec();
+    }
+
+    return is_successful;
+}
+
+void MainWindow::initialiseTreeView()
+{
+    ui->tv_faq->clear();
+    ui->tv_faq->setColumnCount(faq_data_->column_names_.size()-1);
+
+    QStringList tmp;
+    for(auto& item: faq_data_->column_names_)
+    {
+        tmp.push_back(item);
+    }
+
+    ui->tv_faq->setHeaderLabels(tmp);
+}
+
+void MainWindow::excuteQueryOnDb(QString command)
+{
+    QSqlQuery query;
+    if(query.exec(command)){
+        while(query.next()){
+            faq_data_->faq_values_.push_back(std::vector<QString>());
+
+            for(int i = 0; i < faq_data_->column_names_.count(); ++i){
+                faq_data_->faq_values_.back().push_back(query.value(i).toString());
+            }
+        }
+    } else{
+        ui->statusbar->showMessage("Error executing query" + db_instance_->lastError());
+    }
+}
+
+void MainWindow::loadDataToFaqTreeView()
+{
+    // clears whatever is left
+    ui->tv_faq->clear();
+
+    // For each bug, we create a new tree item and set all it's properties
+    int item_counter = 0;
+    for(auto& mem_item : faq_data_->faq_values_)
+    {
+        QTreeWidgetItem * item = new QTreeWidgetItem(ui->tv_faq);
+
+        int col_counter = 0;
+        int col_iter = 0;
+        for(auto& column_string : mem_item){
+            auto is_enum = faq_data_->enum_cols.find(col_iter);
+            if(is_enum != faq_data_->enum_cols.end())
+                item->setText(col_counter, faq_data_->projects_[column_string.toInt()]);
+            else item->setText(col_counter,column_string);
+
+            item->setData(col_counter, 0x0100, QVariant::fromValue<int>(item_counter));
+            col_counter++;
+            col_iter++;
+        }
+
+        item_counter++;
+    }
+}
+
+void MainWindow::on_actionSettings_triggered(){
     // Runs a dialog to update the DB settings
     DbSettings dialog(this);
     dialog.exec();
@@ -66,21 +176,18 @@ void MainWindow::on_actionSettings_triggered()
     if(dialog.result() != QDialog::DialogCode::Accepted)
     {
         ui->statusbar->showMessage("Settings not updated");
-        return;
+    } else{
+        // Writes it to 'settings.ini' file
+        std::fstream ofs;
+        ofs.open("settings.ini",std::ios::out);
+        ofs << dialog.username().toStdString() << std::endl << dialog.password().toStdString()
+            << std::endl << dialog.hostname().toStdString() << std::endl << dialog.dbname().toStdString()
+            << std::endl << dialog.port();
+        ofs.close();
+        loadDatabase();
     }
-
-    // Writes it to 'settings.ini' file
-    std::fstream ofs;
-    ofs.open("settings.ini",std::ios::out);
-    ofs << dialog.username().toStdString() << std::endl << dialog.password().toStdString()
-        << std::endl << dialog.hostname().toStdString() << std::endl << dialog.dbname().toStdString()
-        << std::endl << dialog.port();
-
-    ofs.close();
-    loadDatabase();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow(){
     delete ui;
 }

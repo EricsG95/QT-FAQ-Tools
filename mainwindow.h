@@ -1,16 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "dbhandler.h"
-
 #include <QMainWindow>
+#include <QDesktopWidget>
 #include <QMessageBox>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+
 #include <fstream>
 #include <iostream>
-
 #include <memory>
 
 #include "dbsettings.h"
+#include "dbhandler.h"
+#include "dataobject.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,10 +32,18 @@ private slots:
 
 private:
     std::unique_ptr<DbHandler> db_instance_;
+    std::unique_ptr<DataObject> faq_data_;
     Ui::MainWindow *ui;
 
     void initialiseDB();
     void loadDatabase();
     void loadSettings(std::vector<QString>& dbparams, int& port);
+
+    bool prepareViewData();
+    void initialiseTreeView();
+
+    // Should be moved to db handler
+    void excuteQueryOnDb(QString command);
+    void loadDataToFaqTreeView();
 };
 #endif // MAINWINDOW_H
