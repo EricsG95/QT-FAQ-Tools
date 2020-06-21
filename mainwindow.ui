@@ -36,14 +36,14 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="btn_filter">
               <property name="text">
-               <string>View Questions</string>
+               <string>Filter Questions</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="btn_reset">
               <property name="text">
                <string>Reset</string>
               </property>
@@ -69,7 +69,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QTextBrowser" name="textBrowser">
+       <widget class="QTextBrowser" name="tb_faq_details">
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -94,18 +94,13 @@ p, li { white-space: pre-wrap; }
    </property>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
-     <string>Database</string>
+     <string>Connection</string>
     </property>
+    <addaction name="actionReconnect"/>
     <addaction name="actionSettings"/>
-   </widget>
-   <widget class="QMenu" name="menuQuestion">
-    <property name="title">
-     <string>FAQ</string>
-    </property>
-    <addaction name="actionAdd"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuConnection"/>
-   <addaction name="menuQuestion"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSettings">
@@ -113,9 +108,14 @@ p, li { white-space: pre-wrap; }
     <string>Settings</string>
    </property>
   </action>
-  <action name="actionAdd">
+  <action name="actionExit">
    <property name="text">
-    <string>Add new FAQ</string>
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionReconnect">
+   <property name="text">
+    <string>Reconnect</string>
    </property>
   </action>
  </widget>

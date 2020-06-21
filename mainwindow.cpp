@@ -7,10 +7,22 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    connect(ui->tv_faqs,
+            SIGNAL(itemClicked(QTreeWidgetItem*,int)),
+            this,
+            SLOT(onTvFaqsItemClicked(QTreeWidgetItem*,int)));
+
     loadDatabase();
 }
 
-void MainWindow::loadDatabase(){
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::loadDatabase()
+{
     if(db_instance_ != nullptr)
     {
         db_instance_->close();
@@ -32,7 +44,8 @@ void MainWindow::loadDatabase(){
     loadDataToFaqTreeView();
 }
 
-void MainWindow::initialiseDB() {
+void MainWindow::initialiseDB()
+{
     int port_setting;
     std::vector<QString> db_settings(4,0);
 
@@ -43,7 +56,8 @@ void MainWindow::initialiseDB() {
 }
 
 void MainWindow::loadSettings(std::vector<QString>& dbparams,
-                              int& port){
+                              int& port)
+{
     std::ifstream ifs;
     ifs.open("settings.ini");
     std::string name,pass,host,db;
@@ -95,9 +109,9 @@ bool MainWindow::prepareViewData()
             itm->setData(0x0100,query.value(0));
             ui->lv_projects->addItem(itm);
         }
-    } else{
+    } else {
         is_successful = false;
-        all_errors += "Error loading state names.\n";
+        all_errors += "Error loading projects list";
     }
 
     if(!is_successful)
@@ -112,8 +126,8 @@ bool MainWindow::prepareViewData()
 
 void MainWindow::initialiseTreeView()
 {
-    ui->tv_faq->clear();
-    ui->tv_faq->setColumnCount(faq_data_->column_names_.size()-1);
+    ui->tv_faqs->clear();
+    ui->tv_faqs->setColumnCount(faq_data_->column_names_.size()-1);
 
     QStringList tmp;
     for(auto& item: faq_data_->column_names_)
@@ -121,7 +135,7 @@ void MainWindow::initialiseTreeView()
         tmp.push_back(item);
     }
 
-    ui->tv_faq->setHeaderLabels(tmp);
+    ui->tv_faqs->setHeaderLabels(tmp);
 }
 
 void MainWindow::excuteQueryOnDb(QString command)
@@ -131,7 +145,7 @@ void MainWindow::excuteQueryOnDb(QString command)
         while(query.next()){
             faq_data_->faq_values_.push_back(std::vector<QString>());
 
-            for(int i = 0; i < faq_data_->column_names_.count(); ++i){
+            for(int i = 0; i < faq_data_->column_names_.count(); i++){
                 faq_data_->faq_values_.back().push_back(query.value(i).toString());
             }
         }
@@ -142,14 +156,12 @@ void MainWindow::excuteQueryOnDb(QString command)
 
 void MainWindow::loadDataToFaqTreeView()
 {
-    // clears whatever is left
-    ui->tv_faq->clear();
+    ui->tv_faqs->clear();
 
-    // For each bug, we create a new tree item and set all it's properties
     int item_counter = 0;
     for(auto& mem_item : faq_data_->faq_values_)
     {
-        QTreeWidgetItem * item = new QTreeWidgetItem(ui->tv_faq);
+        QTreeWidgetItem * item = new QTreeWidgetItem(ui->tv_faqs);
 
         int col_counter = 0;
         int col_iter = 0;
@@ -168,8 +180,8 @@ void MainWindow::loadDataToFaqTreeView()
     }
 }
 
-void MainWindow::on_actionSettings_triggered(){
-    // Runs a dialog to update the DB settings
+void MainWindow::on_actionSettings_triggered()
+{
     DbSettings dialog(this);
     dialog.exec();
 
@@ -188,6 +200,74 @@ void MainWindow::on_actionSettings_triggered(){
     }
 }
 
-MainWindow::~MainWindow(){
-    delete ui;
+void MainWindow::onTvFaqsItemClicked(QTreeWidgetItem *item, int column)
+{
+    int item_position_ =  item->data(column,0x0100).toInt();
+    QString text;
+
+    int i = 0;
+    for(auto& field : faq_data_->faq_values_[item_position_])
+    {
+        auto is_enum = faq_data_->enum_cols.find(i);
+        if(is_enum == faq_data_->enum_cols.end())
+        {
+            QString tmp = field;
+            text += "<b>" +
+                    faq_data_->column_names_.at(i) +
+                    "</b><br>" +
+                    tmp.replace("\n","<br>") + "<br><br>";
+        } else
+            text += "<b>" +
+                    faq_data_->column_names_.at(i) +
+                    "</b><br>" +
+                    faq_data_->projects_.at(field.toInt()) + "<br><br>";
+
+        i++;
+    }
+
+    ui->tb_faq_details->setText(text);
+}
+
+void MainWindow::on_btn_reset_clicked()
+{
+    for(int i = 0; i < ui->lv_projects->count(); i++)
+        ui->lv_projects->item(i)->setCheckState(Qt::CheckState::Checked);
+}
+
+
+void MainWindow::on_btn_filter_clicked()
+{
+    QString query = "SELECT * FROM questions WHERE";
+
+    QStringList checked_projects_;
+    for(int i = 0; i < ui->lv_projects->count(); ++i)
+    {
+        if(ui->lv_projects->item(i)->checkState() == Qt::CheckState::Checked)
+            checked_projects_.push_back(QString(" projectId='") + QString::number(ui->lv_projects->item(i)->data(0x0100).toInt()) +"'");
+    }
+
+    if(checked_projects_.size() > 0)
+    {
+        query+=" (";
+        for(int i = 0; i < checked_projects_.size(); ++i)
+        {
+            if(i != 0) query += " OR";
+            query += checked_projects_[i];
+        }
+        query += ")";
+    }
+
+    faq_data_->faq_values_.clear();
+    excuteQueryOnDb(query);
+    loadDataToFaqTreeView();
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    exit(0);
+}
+
+void MainWindow::on_actionReconnect_triggered()
+{
+    loadDatabase();
 }

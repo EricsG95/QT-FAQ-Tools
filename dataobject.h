@@ -18,9 +18,6 @@ public:
 
     std::vector< std::vector<QString> > faq_values_;
     std::set< int> enum_cols;
-    int bug_count_;
-
-    QStringList return_states_atIndex(int i);
 };
 
 #endif // DATAOBJECT_H

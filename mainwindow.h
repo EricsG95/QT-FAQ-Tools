@@ -29,6 +29,13 @@ public:
 
 private slots:
     void on_actionSettings_triggered();
+    void onTvFaqsItemClicked(QTreeWidgetItem *item, int column);
+    void on_btn_reset_clicked();
+    void on_btn_filter_clicked();
+
+    void on_actionExit_triggered();
+
+    void on_actionReconnect_triggered();
 
 private:
     std::unique_ptr<DbHandler> db_instance_;
@@ -42,7 +49,7 @@ private:
     bool prepareViewData();
     void initialiseTreeView();
 
-    // Should be moved to db handler
+    // Could be moved to db handler
     void excuteQueryOnDb(QString command);
     void loadDataToFaqTreeView();
 };
