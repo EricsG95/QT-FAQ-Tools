@@ -31,8 +31,8 @@ private:
     std::unique_ptr<DbHandler> db_instance_;
     Ui::MainWindow *ui;
 
-    bool initialiseDB();
-    void loadNewDatabase();
-    bool loadSettings(std::vector<QString>& dbparams, int& port);
+    void initialiseDB();
+    void loadDatabase();
+    void loadSettings(std::vector<QString>& dbparams, int& port);
 };
 #endif // MAINWINDOW_H

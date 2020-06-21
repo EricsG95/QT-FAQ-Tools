@@ -2,6 +2,8 @@
 #define DBSETTINGS_H
 
 #include <QDialog>
+#include <iostream>
+#include <fstream>
 
 namespace Ui {
 class DbSettings;

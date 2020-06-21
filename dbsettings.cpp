@@ -6,6 +6,23 @@ DbSettings::DbSettings(QWidget *parent) :
     ui(new Ui::DbSettings)
 {
     ui->setupUi(this);
+
+    std::string name,pass,host,db;
+    int port;
+
+    std::ifstream ifs;
+    ifs.open("settings.ini");
+
+    if(ifs.is_open())
+    {
+        ifs >> name >>  pass >>  host >> db >> port;
+        ifs.close();
+        ui->le_username->setText(QString::fromStdString(name));
+        ui->le_password->setText(QString::fromStdString(pass));
+        ui->le_host->setText(QString::fromStdString(host));
+        ui->le_database->setText(QString::fromStdString(db));
+        ui->le_port->setText(QString::number(port));
+    }
 }
 
 DbSettings::~DbSettings()
@@ -35,7 +52,6 @@ QString DbSettings::dbname() const
 
 int DbSettings::port() const
 {
-    // called only after accept which checks convertibility
     QString tmp;
     tmp = ui->le_port->text();
     bool ok;
@@ -49,12 +65,10 @@ void DbSettings::on_btn_set_app_clicked()
     tmp = ui->le_port->text();
     bool ok;
     tmp.toInt(&ok,10);
-    if(ok)
-    {
+
+    if(ok){
         accept();
-    }
-    else
-    {
+    } else{
         reject();
     }
 }
