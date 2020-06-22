@@ -17,7 +17,7 @@ public:
     std::unordered_map<std::string, int> rev_projects_;
 
     std::vector< std::vector<QString> > faq_values_;
-    std::set< int> enum_cols;
+    std::set<int> enum_cols;
 };
 
 #endif // DATAOBJECT_H

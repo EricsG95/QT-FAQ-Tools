@@ -70,8 +70,7 @@ bool MainWindow::prepareViewData()
     faq_data_->column_names_<< "ID" << "Question" << "Answer" << "Project";
 
     // load set with enumerator columns
-    faq_data_->enum_cols.insert(4);
-    faq_data_->enum_cols.insert(7);
+    faq_data_->enum_cols.insert(3);
 
     ui->lv_projects->clear();
 
