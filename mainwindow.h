@@ -7,13 +7,12 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
-#include <fstream>
-#include <iostream>
 #include <memory>
 
 #include "dbsettings.h"
 #include "dbhandler.h"
 #include "dataobject.h"
+#include "settingsfileservice.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,22 +23,24 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(std::unique_ptr<SettingsFileService> fileService);
     ~MainWindow();
 
 private slots:
     void on_actionSettings_triggered();
+    void on_actionExit_triggered();
+    void on_actionReconnect_triggered();
+
     void onTvFaqsItemClicked(QTreeWidgetItem *item, int column);
+
     void on_btn_reset_clicked();
     void on_btn_filter_clicked();
-
-    void on_actionExit_triggered();
-
-    void on_actionReconnect_triggered();
 
 private:
     std::unique_ptr<DbHandler> db_instance_;
     std::unique_ptr<DataObject> faq_data_;
+    std::unique_ptr<SettingsFileService> fileService_;
+
     Ui::MainWindow *ui;
 
     void initialiseDB();

@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(std::unique_ptr<SettingsFileService> fileService)
+    : QMainWindow(nullptr)
+    , fileService_(std::move(fileService))
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    fileService_ = std::make_unique<SettingsFileService>();
 
     connect(ui->tv_faqs,
             SIGNAL(itemClicked(QTreeWidgetItem*,int)),
@@ -49,7 +50,7 @@ void MainWindow::initialiseDB()
     int port_setting;
     std::vector<QString> db_settings(4,0);
 
-    loadSettings(db_settings,port_setting);
+    loadSettings(db_settings, port_setting);
 
     db_instance_ = std::make_unique<DbHandler>(
                 db_settings, port_setting);
@@ -58,24 +59,7 @@ void MainWindow::initialiseDB()
 void MainWindow::loadSettings(std::vector<QString>& dbparams,
                               int& port)
 {
-    std::ifstream ifs;
-    ifs.open("settings.ini");
-    std::string name,pass,host,db;
-
-    if(!ifs.is_open()){
-        dbparams[0] = "faqadmin";
-        dbparams[1] = "222&autoDesk";
-        dbparams[2] = "postgresql-10318-0.cloudclusters.net";
-        dbparams[3] = "faqtooldb";
-        port = 10318;
-    } else {
-        ifs >> name >>  pass >>  host >> db >> port;
-        dbparams[0] = QString::fromStdString(name);
-        dbparams[1] = QString::fromStdString(pass);
-        dbparams[2] = QString::fromStdString(host);
-        dbparams[3] = QString::fromStdString(db);
-        ifs.close();
-    }
+    fileService_->loadSettings(dbparams, port);
 }
 
 bool MainWindow::prepareViewData()
@@ -188,14 +172,8 @@ void MainWindow::on_actionSettings_triggered()
     if(dialog.result() != QDialog::DialogCode::Accepted)
     {
         ui->statusbar->showMessage("Settings not updated");
-    } else{
-        // Writes it to 'settings.ini' file
-        std::fstream ofs;
-        ofs.open("settings.ini",std::ios::out);
-        ofs << dialog.username().toStdString() << std::endl << dialog.password().toStdString()
-            << std::endl << dialog.hostname().toStdString() << std::endl << dialog.dbname().toStdString()
-            << std::endl << dialog.port();
-        ofs.close();
+    } else {
+        fileService_->saveSettings(dialog);
         loadDatabase();
     }
 }
@@ -234,7 +212,6 @@ void MainWindow::on_btn_reset_clicked()
         ui->lv_projects->item(i)->setCheckState(Qt::CheckState::Checked);
 }
 
-
 void MainWindow::on_btn_filter_clicked()
 {
     QString query = "SELECT * FROM questions WHERE";
@@ -243,12 +220,15 @@ void MainWindow::on_btn_filter_clicked()
     for(int i = 0; i < ui->lv_projects->count(); ++i)
     {
         if(ui->lv_projects->item(i)->checkState() == Qt::CheckState::Checked)
-            checked_projects_.push_back(QString(" projectId='") + QString::number(ui->lv_projects->item(i)->data(0x0100).toInt()) +"'");
+            checked_projects_.push_back(
+                        QString(" projectId='") +
+                        QString::number(ui->lv_projects->item(i)->data(0x0100).toInt())
+                        +"'");
     }
 
     if(checked_projects_.size() > 0)
     {
-        query+=" (";
+        query+="(";
         for(int i = 0; i < checked_projects_.size(); ++i)
         {
             if(i != 0) query += " OR";

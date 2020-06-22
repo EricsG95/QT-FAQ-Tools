@@ -20,13 +20,16 @@ SOURCES += \
     dbhandler.cpp \
     dbsettings.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    settingsfileservice.cpp
 
 HEADERS += \
     dataobject.h \
     dbhandler.h \
     dbsettings.h \
-    mainwindow.h
+    di.h \
+    mainwindow.h \
+    settingsfileservice.h
 
 FORMS += \
     dbsettings.ui \
