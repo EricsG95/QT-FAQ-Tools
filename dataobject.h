@@ -16,7 +16,7 @@ public:
     std::unordered_map<int, QString> projects_;
     std::unordered_map<std::string, int> rev_projects_;
 
-    std::vector< std::vector<QString> > faq_values_;
+    std::vector<std::vector<QString>> faq_values_;
     std::set<int> enum_cols;
 };
 

@@ -6,15 +6,15 @@
 #include <fstream>
 #include <iostream>
 
-#include "dbsettings.h"
-
 class SettingsFileService
 {
 public:
     SettingsFileService();
     void loadSettings(std::vector<QString>& dbparams, int& port);
+    void saveSettings(std::vector<QString>& dbparams, int& port);
+
+private:
     void applyDefaultSettings(std::vector<QString>& dbparams, int& port);
-    void saveSettings(DbSettings& dialog);
 };
 
 #endif // FILESERVICE_H

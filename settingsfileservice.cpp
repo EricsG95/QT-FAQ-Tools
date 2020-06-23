@@ -7,16 +7,19 @@ void SettingsFileService::loadSettings(
 {
     std::ifstream ifs;
     ifs.open("settings.ini");
+
     std::string name,pass,host,db;
 
     if(!ifs.is_open()){
         applyDefaultSettings(dbparams, port);
     } else {
         ifs >> name >> pass >> host >> db >> port;
+
         dbparams[0] = QString::fromStdString(name);
         dbparams[1] = QString::fromStdString(pass);
         dbparams[2] = QString::fromStdString(host);
         dbparams[3] = QString::fromStdString(db);
+
         ifs.close();
     }
 }
@@ -31,14 +34,16 @@ void SettingsFileService::applyDefaultSettings(
     port = 10318;
 }
 
-void SettingsFileService::saveSettings(DbSettings& dialog)
+void SettingsFileService::saveSettings(std::vector<QString>& dbparams, int& port)
 {
     std::fstream ofs;
     ofs.open("settings.ini",std::ios::out);
-    ofs << dialog.username().toStdString() << std::endl
-        << dialog.password().toStdString() << std::endl
-        << dialog.hostname().toStdString() << std::endl
-        << dialog.dbname().toStdString() << std::endl
-        << dialog.port();
+
+    ofs << dbparams[0].toStdString() << std::endl
+        << dbparams[1].toStdString() << std::endl
+        << dbparams[2].toStdString() << std::endl
+        << dbparams[3].toStdString() << std::endl
+        << port;
+
     ofs.close();
 }
