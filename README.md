@@ -56,3 +56,10 @@ Here in this project, my objective was first:
       PASS   : TestSettingsFileService::cleanupTestCase()\
       Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 1ms\
       >********* Finished testing of TestSettingsFileService *********
+
+# Deep Dive C++
+Moreover, the following are the courses I will be going through to better understand C++. It has been a wonderful time in getting to know more and more about C++.
+
+   - [Beginning C++ Programming - From Beginner to Beyond](https://www.udemy.com/course/beginning-c-plus-plus-programming/)
+   - [Beginning Test Driven Development in C++](https://www.udemy.com/course/beginning-test-driven-development-in-c/)
+   - [Qt 5 C++ GUI Development For Beginners : The Fundamentals](https://www.udemy.com/course/qt-c-gui-tutorial-for-complete-beginners/)
