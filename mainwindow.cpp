@@ -1,12 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(std::unique_ptr<SettingsFileService> fileService)
+MainWindow::MainWindow(std::shared_ptr<SettingsFileService> fileService,
+                       std::shared_ptr<IDbHandler> dbHandler)
     : QMainWindow(nullptr)
-    , fileService_(std::move(fileService))
+    , fileService_(fileService)
+    , db_handler_(dbHandler)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     fileService_ = std::make_unique<SettingsFileService>();
 
     connect(ui->tv_faqs,
@@ -24,15 +27,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::loadDatabase()
 {
-    if(db_instance_ != nullptr)
+    if(db_handler_ != nullptr)
     {
-        db_instance_->close();
-        db_instance_ = nullptr;
+        db_handler_->close();
+        db_handler_ = nullptr;
     }
 
     initialiseDB();
 
-    ui->statusbar->showMessage(db_instance_->dbConnect());
+    ui->statusbar->showMessage(db_handler_->dbConnect());
 
     faq_data_ = std::make_unique<DataObject>();
 
@@ -52,8 +55,8 @@ void MainWindow::initialiseDB()
 
     loadSettings(db_settings, port_setting);
 
-    db_instance_ = std::make_unique<DbHandler>(
-                db_settings, port_setting);
+    db_handler_ = std::make_unique<DbHandler>();
+    db_handler_->init(db_settings, port_setting);
 }
 
 void MainWindow::loadSettings(std::vector<QString>& dbparams,
@@ -100,7 +103,7 @@ bool MainWindow::prepareViewData()
     if(!is_successful)
     {
         QMessageBox msg;
-        msg.setText(all_errors + db_instance_->lastError() + query.lastError().text());
+        msg.setText(all_errors + db_handler_->lastError() + query.lastError().text());
         msg.exec();
     }
 
@@ -133,7 +136,7 @@ void MainWindow::excuteQueryOnDb(QString command)
             }
         }
     } else{
-        ui->statusbar->showMessage("Error executing query" + db_instance_->lastError());
+        ui->statusbar->showMessage("Error executing query" + db_handler_->lastError());
     }
 }
 
@@ -172,14 +175,23 @@ void MainWindow::on_actionSettings_triggered()
     {
         ui->statusbar->showMessage("Settings not updated");
     } else {
-        fileService_->saveSettings(dialog);
+        std::vector<QString> input_value_(4,0);
+        int port;
+
+        input_value_[0] = dialog.username();
+        input_value_[1] = dialog.password();
+        input_value_[2] = dialog.hostname();
+        input_value_[3] = dialog.dbname();
+        port = dialog.port();
+
+        fileService_->saveSettings(input_value_, port);
         loadDatabase();
     }
 }
 
 void MainWindow::onTvFaqsItemClicked(QTreeWidgetItem *item, int column)
 {
-    int item_position_ =  item->data(column,0x0100).toInt();
+    int item_position_ = item->data(column,0x0100).toInt();
     QString text;
 
     int i = 0;
