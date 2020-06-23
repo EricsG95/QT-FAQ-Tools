@@ -47,8 +47,8 @@ void MainWindow::loadDatabase()
 
 void MainWindow::initialiseDB()
 {
-    int port_setting;
     std::vector<QString> db_settings(4,0);
+    int port_setting;
 
     loadSettings(db_settings, port_setting);
 
