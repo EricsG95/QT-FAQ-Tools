@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(std::shared_ptr<SettingsFileService> fileService,
+    MainWindow(std::shared_ptr<ISettingsFileService> fileService,
                std::shared_ptr<IDbHandler> dbHandler);
     ~MainWindow();
 
@@ -38,8 +38,9 @@ private slots:
     void on_btn_filter_clicked();
 
 private:
-    std::shared_ptr<SettingsFileService> fileService_;
+    std::shared_ptr<ISettingsFileService> fileService_;
     std::shared_ptr<IDbHandler> db_handler_;
+
     std::unique_ptr<DataObject> faq_data_;
 
     Ui::MainWindow *ui;

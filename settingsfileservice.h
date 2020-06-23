@@ -6,15 +6,17 @@
 #include <fstream>
 #include <iostream>
 
-class SettingsFileService
+#include "isettingsfileservice.h"
+
+class SettingsFileService : public ISettingsFileService
 {
 public:
     SettingsFileService();
-    void loadSettings(std::vector<QString>& dbparams, int& port);
-    void saveSettings(std::vector<QString>& dbparams, int& port);
+    void loadSettings(std::vector<QString>& dbparams, int& port) override;
+    void saveSettings(std::vector<QString>& dbparams, int& port) override;
 
 private:
-    void applyDefaultSettings(std::vector<QString>& dbparams, int& port);
+    void applyDefaultSettings(std::vector<QString>& dbparams, int& port) override;
 };
 
 #endif // FILESERVICE_H

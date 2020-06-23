@@ -1,9 +1,5 @@
 #include "mainwindow.h"
 #include "di.h"
-#include "settingsfileservice.h"
-
-//#include "dbhandler.h"
-//#include "IDbHandler.h"
 
 #include <QApplication>
 
@@ -14,7 +10,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
      auto injector = di::make_injector(
-       di::bind<SettingsFileService>.to<SettingsFileService>(),
+       di::bind<ISettingsFileService>.to<SettingsFileService>(),
        di::bind<IDbHandler>.to<DbHandler>()
      );
 

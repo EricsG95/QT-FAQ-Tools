@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(std::shared_ptr<SettingsFileService> fileService,
+MainWindow::MainWindow(std::shared_ptr<ISettingsFileService> fileService,
                        std::shared_ptr<IDbHandler> dbHandler)
     : QMainWindow(nullptr)
     , fileService_(fileService)
