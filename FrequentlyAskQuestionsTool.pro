@@ -28,6 +28,7 @@ HEADERS += \
     dbhandler.h \
     dbsettings.h \
     di.h \
+    ibdhandler.h \
     mainwindow.h \
     settingsfileservice.h
 

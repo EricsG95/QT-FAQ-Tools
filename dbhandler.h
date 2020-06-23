@@ -8,15 +8,17 @@
 #include <QString>
 #include <QtSql>
 
-class DbHandler
+#include "ibdhandler.h"
+
+class DbHandler : public IDbHandler
 {
 public:
     DbHandler();
-    DbHandler(std::vector<QString>& dbparams ,int port);
-    QString dbConnect();
-    bool is_open(){ return database_.isOpen(); }
-    QString lastError();
-    void close();
+    QString dbConnect() override;
+    void init(std::vector<QString>& dbparams ,int port) override;
+    bool is_open() override {return database_.isOpen(); }
+    QString lastError() override;
+    void close() override;
 
 private:
     QSqlDatabase database_;

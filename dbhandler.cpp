@@ -1,15 +1,12 @@
 #include "dbhandler.h"
 
-DbHandler::DbHandler(){
+DbHandler::DbHandler() {
     database_.removeDatabase("qt_sql_default_connection");
     database_ = QSqlDatabase::addDatabase("QPSQL");
 }
 
-DbHandler::DbHandler(std::vector<QString>& dbparams ,int port)
+void DbHandler::init(std::vector<QString>& dbparams ,int port)
 {
-    database_.removeDatabase("qt_sql_default_connection");
-    database_ = QSqlDatabase::addDatabase("QPSQL");
-
     username_ = dbparams[0];
     password_ = dbparams[1];
     hostname_ = dbparams[2];
