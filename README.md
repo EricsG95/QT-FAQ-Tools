@@ -16,8 +16,43 @@ Here in this project, my objective was first:
    - Load data to view
    - Simple data filtering
 
+   ![FAQ Tool SS](https://i.ibb.co/3Rg1yk5/project-faq.jpg)
+
 2. Understanding the nature of C++ and how it is differing to other languages in terms of data types, pointers, STL and exploring further to more in-depth topics
 
 3. Applying common best practices
-   - Dependency injection using [DI Boost](https://github.com/boost-experimental/di)
+   - Dependency injection using [Boost DI](https://github.com/boost-experimental/di)
+   
+      ```
+      main.cpp
+
+      auto injector = di::make_injector(
+         di::bind<ISettingsFileService>.to<SettingsFileService>(),
+         di::bind<IDbHandler>.to<DbHandler>()
+      );
+
+      std::unique_ptr<MainWindow> w =
+         injector.create<std::unique_ptr<MainWindow>>();
+      ```
+
+      ```
+      mainwindow.cpp
+
+      MainWindow::MainWindow(std::shared_ptr<ISettingsFileService> fileService,
+                        std::shared_ptr<IDbHandler> dbHandler)
+      : QMainWindow(nullptr)
+      , fileService_(fileService)
+      , db_handler_(dbHandler)
+      , ui(new Ui::MainWindow) {...}
+      ```
+
    - Unit testing using [Qt Test](https://doc.qt.io/qt-5/qtest-overview.html)
+
+      >********* Start testing of TestSettingsFileService *********\
+      >Config: Using QtTest library 5.15.0, Qt 5.15.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 8.1.0)\
+      PASS   : TestSettingsFileService::initTestCase()\
+      PASS   : TestSettingsFileService::settingsLoadedSuccessfully()\
+      PASS   : TestSettingsFileService::newSettingsSavedSuccessfully()\
+      PASS   : TestSettingsFileService::cleanupTestCase()\
+      Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 1ms\
+      >********* Finished testing of TestSettingsFileService *********
